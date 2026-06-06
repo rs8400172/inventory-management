@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, EmailStr, validator
 from datetime import datetime
 from typing import Optional, List
 
@@ -6,10 +6,22 @@ from typing import Optional, List
 # ==================== PRODUCT SCHEMAS ====================
 
 class ProductBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    sku: str = Field(..., min_length=1, max_length=100)
+    name: str
+    sku: str
     price: float
-    stock_quantity: int = Field(default=0, ge=0)
+    stock_quantity: int = 0
+
+    @validator("name")
+    def validate_name(cls, v):
+        if not v or len(v) < 1 or len(v) > 255:
+            raise ValueError("Name must be between 1 and 255 characters")
+        return v
+
+    @validator("sku")
+    def validate_sku(cls, v):
+        if not v or len(v) < 1 or len(v) > 100:
+            raise ValueError("SKU must be between 1 and 100 characters")
+        return v
 
     @validator("price")
     def validate_price(cls, v):
@@ -29,9 +41,15 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    name: Optional[str] = None
     price: Optional[float] = None
-    stock_quantity: Optional[int] = Field(None, ge=0)
+    stock_quantity: Optional[int] = None
+
+    @validator("name")
+    def validate_name(cls, v):
+        if v is not None and (len(v) < 1 or len(v) > 255):
+            raise ValueError("Name must be between 1 and 255 characters")
+        return v
 
     @validator("price")
     def validate_price(cls, v):
@@ -57,10 +75,28 @@ class ProductResponse(ProductBase):
 # ==================== CUSTOMER SCHEMAS ====================
 
 class CustomerBase(BaseModel):
-    full_name: str = Field(..., min_length=1, max_length=255)
+    full_name: str
     email: EmailStr
-    phone_number: Optional[str] = Field(None, max_length=20)
-    address: Optional[str] = Field(None, max_length=500)
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+
+    @validator("full_name")
+    def validate_full_name(cls, v):
+        if not v or len(v) < 1 or len(v) > 255:
+            raise ValueError("Full name must be between 1 and 255 characters")
+        return v
+
+    @validator("phone_number")
+    def validate_phone(cls, v):
+        if v is not None and len(v) > 20:
+            raise ValueError("Phone number must be at most 20 characters")
+        return v
+
+    @validator("address")
+    def validate_address(cls, v):
+        if v is not None and len(v) > 500:
+            raise ValueError("Address must be at most 500 characters")
+        return v
 
 
 class CustomerCreate(CustomerBase):
@@ -68,9 +104,27 @@ class CustomerCreate(CustomerBase):
 
 
 class CustomerUpdate(BaseModel):
-    full_name: Optional[str] = Field(None, min_length=1, max_length=255)
-    phone_number: Optional[str] = Field(None, max_length=20)
-    address: Optional[str] = Field(None, max_length=500)
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+
+    @validator("full_name")
+    def validate_full_name(cls, v):
+        if v is not None and (len(v) < 1 or len(v) > 255):
+            raise ValueError("Full name must be between 1 and 255 characters")
+        return v
+
+    @validator("phone_number")
+    def validate_phone(cls, v):
+        if v is not None and len(v) > 20:
+            raise ValueError("Phone number must be at most 20 characters")
+        return v
+
+    @validator("address")
+    def validate_address(cls, v):
+        if v is not None and len(v) > 500:
+            raise ValueError("Address must be at most 500 characters")
+        return v
 
 
 class CustomerResponse(CustomerBase):
@@ -120,7 +174,7 @@ class OrderBase(BaseModel):
 
 
 class OrderCreate(OrderBase):
-    items: List[OrderItemCreate] = Field(..., min_items=1)
+    items: List[OrderItemCreate]
 
     @validator("items")
     def validate_items(cls, v):
