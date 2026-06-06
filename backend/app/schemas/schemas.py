@@ -11,25 +11,25 @@ class ProductBase(BaseModel):
     price: float
     stock_quantity: int = 0
 
-    @validator("name")
+    @validator("name", check_fields=False)
     def validate_name(cls, v):
         if not v or len(v) < 1 or len(v) > 255:
             raise ValueError("Name must be between 1 and 255 characters")
         return v
 
-    @validator("sku")
+    @validator("sku", check_fields=False)
     def validate_sku(cls, v):
         if not v or len(v) < 1 or len(v) > 100:
             raise ValueError("SKU must be between 1 and 100 characters")
         return v
 
-    @validator("price")
+    @validator("price", check_fields=False)
     def validate_price(cls, v):
         if v <= 0:
             raise ValueError("Price must be greater than 0")
         return v
 
-    @validator("stock_quantity")
+    @validator("stock_quantity", check_fields=False)
     def validate_stock(cls, v):
         if v < 0:
             raise ValueError("Stock quantity cannot be negative")
@@ -80,19 +80,19 @@ class CustomerBase(BaseModel):
     phone_number: Optional[str] = None
     address: Optional[str] = None
 
-    @validator("full_name")
+    @validator("full_name", check_fields=False)
     def validate_full_name(cls, v):
         if not v or len(v) < 1 or len(v) > 255:
             raise ValueError("Full name must be between 1 and 255 characters")
         return v
 
-    @validator("phone_number")
+    @validator("phone_number", check_fields=False)
     def validate_phone(cls, v):
         if v is not None and len(v) > 20:
             raise ValueError("Phone number must be at most 20 characters")
         return v
 
-    @validator("address")
+    @validator("address", check_fields=False)
     def validate_address(cls, v):
         if v is not None and len(v) > 500:
             raise ValueError("Address must be at most 500 characters")
@@ -141,7 +141,7 @@ class OrderItemBase(BaseModel):
     product_id: int
     quantity: int
 
-    @validator("product_id", "quantity")
+    @validator("product_id", "quantity", check_fields=False)
     def validate_positive(cls, v):
         if v <= 0:
             raise ValueError("Value must be greater than 0")
@@ -166,7 +166,7 @@ class OrderItemResponse(OrderItemBase):
 class OrderBase(BaseModel):
     customer_id: int
 
-    @validator("customer_id")
+    @validator("customer_id", check_fields=False)
     def validate_customer_id(cls, v):
         if v <= 0:
             raise ValueError("Customer ID must be greater than 0")
@@ -176,7 +176,7 @@ class OrderBase(BaseModel):
 class OrderCreate(OrderBase):
     items: List[OrderItemCreate]
 
-    @validator("items")
+    @validator("items", check_fields=False)
     def validate_items(cls, v):
         if not v:
             raise ValueError("Order must contain at least one item")
