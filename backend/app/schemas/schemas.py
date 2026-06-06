@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, validator, constr, conint
+from pydantic import BaseModel, Field, EmailStr, validator
 from datetime import datetime
 from typing import Optional, List
 
@@ -6,10 +6,16 @@ from typing import Optional, List
 # ==================== PRODUCT SCHEMAS ====================
 
 class ProductBase(BaseModel):
-    name: constr(min_length=1, max_length=255)
-    sku: constr(min_length=1, max_length=100)
-    price: float = Field(..., gt=0)
+    name: str = Field(..., min_length=1, max_length=255)
+    sku: str = Field(..., min_length=1, max_length=100)
+    price: float
     stock_quantity: int = Field(default=0, ge=0)
+
+    @validator("price")
+    def validate_price(cls, v):
+        if v <= 0:
+            raise ValueError("Price must be greater than 0")
+        return v
 
     @validator("stock_quantity")
     def validate_stock(cls, v):
@@ -23,9 +29,15 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(BaseModel):
-    name: Optional[constr(min_length=1, max_length=255)] = None
-    price: Optional[float] = Field(None, gt=0)
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    price: Optional[float] = None
     stock_quantity: Optional[int] = Field(None, ge=0)
+
+    @validator("price")
+    def validate_price(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("Price must be greater than 0")
+        return v
 
     @validator("stock_quantity")
     def validate_stock(cls, v):
@@ -45,10 +57,10 @@ class ProductResponse(ProductBase):
 # ==================== CUSTOMER SCHEMAS ====================
 
 class CustomerBase(BaseModel):
-    full_name: constr(min_length=1, max_length=255)
+    full_name: str = Field(..., min_length=1, max_length=255)
     email: EmailStr
-    phone_number: Optional[constr(max_length=20)] = None
-    address: Optional[constr(max_length=500)] = None
+    phone_number: Optional[str] = Field(None, max_length=20)
+    address: Optional[str] = Field(None, max_length=500)
 
 
 class CustomerCreate(CustomerBase):
@@ -56,9 +68,9 @@ class CustomerCreate(CustomerBase):
 
 
 class CustomerUpdate(BaseModel):
-    full_name: Optional[constr(min_length=1, max_length=255)] = None
-    phone_number: Optional[constr(max_length=20)] = None
-    address: Optional[constr(max_length=500)] = None
+    full_name: Optional[str] = Field(None, min_length=1, max_length=255)
+    phone_number: Optional[str] = Field(None, max_length=20)
+    address: Optional[str] = Field(None, max_length=500)
 
 
 class CustomerResponse(CustomerBase):
@@ -72,8 +84,14 @@ class CustomerResponse(CustomerBase):
 # ==================== ORDER ITEM SCHEMAS ====================
 
 class OrderItemBase(BaseModel):
-    product_id: int = Field(..., gt=0)
-    quantity: int = Field(..., gt=0)
+    product_id: int
+    quantity: int
+
+    @validator("product_id", "quantity")
+    def validate_positive(cls, v):
+        if v <= 0:
+            raise ValueError("Value must be greater than 0")
+        return v
 
 
 class OrderItemCreate(OrderItemBase):
@@ -92,7 +110,13 @@ class OrderItemResponse(OrderItemBase):
 # ==================== ORDER SCHEMAS ====================
 
 class OrderBase(BaseModel):
-    customer_id: int = Field(..., gt=0)
+    customer_id: int
+
+    @validator("customer_id")
+    def validate_customer_id(cls, v):
+        if v <= 0:
+            raise ValueError("Customer ID must be greater than 0")
+        return v
 
 
 class OrderCreate(OrderBase):
