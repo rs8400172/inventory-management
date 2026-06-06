@@ -19,7 +19,7 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://localhost:5173",
         "http://frontend:3000",
-        "https://vercel-domain.com"
+        "https://peaceful-heliotrope-f711a7.netlify.app"
     ]
     
     # Environment
