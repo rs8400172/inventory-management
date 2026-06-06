@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, validator, constr, conint
 from datetime import datetime
 from typing import Optional, List
 
@@ -6,8 +6,8 @@ from typing import Optional, List
 # ==================== PRODUCT SCHEMAS ====================
 
 class ProductBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    sku: str = Field(..., min_length=1, max_length=100)
+    name: constr(min_length=1, max_length=255)
+    sku: constr(min_length=1, max_length=100)
     price: float = Field(..., gt=0)
     stock_quantity: int = Field(default=0, ge=0)
 
@@ -23,7 +23,7 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    name: Optional[constr(min_length=1, max_length=255)] = None
     price: Optional[float] = Field(None, gt=0)
     stock_quantity: Optional[int] = Field(None, ge=0)
 
@@ -45,10 +45,10 @@ class ProductResponse(ProductBase):
 # ==================== CUSTOMER SCHEMAS ====================
 
 class CustomerBase(BaseModel):
-    full_name: str = Field(..., min_length=1, max_length=255)
+    full_name: constr(min_length=1, max_length=255)
     email: EmailStr
-    phone_number: Optional[str] = Field(None, max_length=20)
-    address: Optional[str] = Field(None, max_length=500)
+    phone_number: Optional[constr(max_length=20)] = None
+    address: Optional[constr(max_length=500)] = None
 
 
 class CustomerCreate(CustomerBase):
@@ -56,9 +56,9 @@ class CustomerCreate(CustomerBase):
 
 
 class CustomerUpdate(BaseModel):
-    full_name: Optional[str] = Field(None, min_length=1, max_length=255)
-    phone_number: Optional[str] = Field(None, max_length=20)
-    address: Optional[str] = Field(None, max_length=500)
+    full_name: Optional[constr(min_length=1, max_length=255)] = None
+    phone_number: Optional[constr(max_length=20)] = None
+    address: Optional[constr(max_length=500)] = None
 
 
 class CustomerResponse(CustomerBase):
