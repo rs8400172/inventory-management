@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
 from datetime import datetime
 from typing import Optional, List
 
@@ -11,25 +11,29 @@ class ProductBase(BaseModel):
     price: float
     stock_quantity: int = 0
 
-    @validator("name", check_fields=False)
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
         if not v or len(v) < 1 or len(v) > 255:
             raise ValueError("Name must be between 1 and 255 characters")
         return v
 
-    @validator("sku", check_fields=False)
+    @field_validator("sku")
+    @classmethod
     def validate_sku(cls, v):
         if not v or len(v) < 1 or len(v) > 100:
             raise ValueError("SKU must be between 1 and 100 characters")
         return v
 
-    @validator("price", check_fields=False)
+    @field_validator("price")
+    @classmethod
     def validate_price(cls, v):
         if v <= 0:
             raise ValueError("Price must be greater than 0")
         return v
 
-    @validator("stock_quantity", check_fields=False)
+    @field_validator("stock_quantity")
+    @classmethod
     def validate_stock(cls, v):
         if v < 0:
             raise ValueError("Stock quantity cannot be negative")
@@ -53,8 +57,7 @@ class ProductResponse(ProductBase):
     id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ==================== CUSTOMER SCHEMAS ====================
@@ -65,19 +68,22 @@ class CustomerBase(BaseModel):
     phone_number: Optional[str] = None
     address: Optional[str] = None
 
-    @validator("full_name", check_fields=False)
+    @field_validator("full_name")
+    @classmethod
     def validate_full_name(cls, v):
         if not v or len(v) < 1 or len(v) > 255:
             raise ValueError("Full name must be between 1 and 255 characters")
         return v
 
-    @validator("phone_number", check_fields=False)
+    @field_validator("phone_number")
+    @classmethod
     def validate_phone(cls, v):
         if v is not None and len(v) > 20:
             raise ValueError("Phone number must be at most 20 characters")
         return v
 
-    @validator("address", check_fields=False)
+    @field_validator("address")
+    @classmethod
     def validate_address(cls, v):
         if v is not None and len(v) > 500:
             raise ValueError("Address must be at most 500 characters")
@@ -101,8 +107,7 @@ class CustomerResponse(CustomerBase):
     id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ==================== ORDER ITEM SCHEMAS ====================
@@ -111,7 +116,8 @@ class OrderItemBase(BaseModel):
     product_id: int
     quantity: int
 
-    @validator("product_id", "quantity", check_fields=False)
+    @field_validator("product_id", "quantity")
+    @classmethod
     def validate_positive(cls, v):
         if v <= 0:
             raise ValueError("Value must be greater than 0")
@@ -127,8 +133,7 @@ class OrderItemResponse(OrderItemBase):
     order_id: int
     unit_price: float
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ==================== ORDER SCHEMAS ====================
@@ -136,7 +141,8 @@ class OrderItemResponse(OrderItemBase):
 class OrderBase(BaseModel):
     customer_id: int
 
-    @validator("customer_id", check_fields=False)
+    @field_validator("customer_id")
+    @classmethod
     def validate_customer_id(cls, v):
         if v <= 0:
             raise ValueError("Customer ID must be greater than 0")
@@ -146,7 +152,8 @@ class OrderBase(BaseModel):
 class OrderCreate(OrderBase):
     items: List[OrderItemCreate]
 
-    @validator("items", check_fields=False)
+    @field_validator("items")
+    @classmethod
     def validate_items(cls, v):
         if not v:
             raise ValueError("Order must contain at least one item")
@@ -158,15 +165,13 @@ class OrderResponse(OrderBase):
     total_amount: float
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OrderDetailResponse(OrderResponse):
     items: List[OrderItemResponse]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ==================== DASHBOARD SCHEMAS ====================
@@ -178,8 +183,7 @@ class LowStockProduct(BaseModel):
     price: float
     stock_quantity: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DashboardResponse(BaseModel):
