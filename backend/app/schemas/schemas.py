@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, validator
 from datetime import datetime
 from typing import Optional, List
 
@@ -41,9 +41,9 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(BaseModel):
-    name: Optional[str] = None
-    price: Optional[float] = None
-    stock_quantity: Optional[int] = None
+    name: Optional[str] = Field(default=None)
+    price: Optional[float] = Field(default=None)
+    stock_quantity: Optional[int] = Field(default=None)
 
     @validator("name", check_fields=False)
     def validate_name(cls, v):
@@ -77,8 +77,8 @@ class ProductResponse(ProductBase):
 class CustomerBase(BaseModel):
     full_name: str
     email: EmailStr
-    phone_number: Optional[str] = None
-    address: Optional[str] = None
+    phone_number: Optional[str] = Field(default=None)
+    address: Optional[str] = Field(default=None)
 
     @validator("full_name", check_fields=False)
     def validate_full_name(cls, v):
@@ -104,9 +104,9 @@ class CustomerCreate(CustomerBase):
 
 
 class CustomerUpdate(BaseModel):
-    full_name: Optional[str] = None
-    phone_number: Optional[str] = None
-    address: Optional[str] = None
+    full_name: Optional[str] = Field(default=None)
+    phone_number: Optional[str] = Field(default=None)
+    address: Optional[str] = Field(default=None)
 
     @validator("full_name", check_fields=False)
     def validate_full_name(cls, v):
