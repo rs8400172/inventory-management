@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, EmailStr, validator
 from datetime import datetime
 from typing import Optional, List
 
@@ -41,27 +41,12 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(BaseModel):
-    name: Optional[str] = Field(default=None)
-    price: Optional[float] = Field(default=None)
-    stock_quantity: Optional[int] = Field(default=None)
+    name: Optional[str] = None
+    price: Optional[float] = None
+    stock_quantity: Optional[int] = None
 
-    @validator("name", check_fields=False)
-    def validate_name(cls, v):
-        if v is not None and (len(v) < 1 or len(v) > 255):
-            raise ValueError("Name must be between 1 and 255 characters")
-        return v
-
-    @validator("price", check_fields=False)
-    def validate_price(cls, v):
-        if v is not None and v <= 0:
-            raise ValueError("Price must be greater than 0")
-        return v
-
-    @validator("stock_quantity", check_fields=False)
-    def validate_stock(cls, v):
-        if v is not None and v < 0:
-            raise ValueError("Stock quantity cannot be negative")
-        return v
+    class Config:
+        from_attributes = True
 
 
 class ProductResponse(ProductBase):
@@ -77,8 +62,8 @@ class ProductResponse(ProductBase):
 class CustomerBase(BaseModel):
     full_name: str
     email: EmailStr
-    phone_number: Optional[str] = Field(default=None)
-    address: Optional[str] = Field(default=None)
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
 
     @validator("full_name", check_fields=False)
     def validate_full_name(cls, v):
@@ -104,27 +89,12 @@ class CustomerCreate(CustomerBase):
 
 
 class CustomerUpdate(BaseModel):
-    full_name: Optional[str] = Field(default=None)
-    phone_number: Optional[str] = Field(default=None)
-    address: Optional[str] = Field(default=None)
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
 
-    @validator("full_name", check_fields=False)
-    def validate_full_name(cls, v):
-        if v is not None and (len(v) < 1 or len(v) > 255):
-            raise ValueError("Full name must be between 1 and 255 characters")
-        return v
-
-    @validator("phone_number", check_fields=False)
-    def validate_phone(cls, v):
-        if v is not None and len(v) > 20:
-            raise ValueError("Phone number must be at most 20 characters")
-        return v
-
-    @validator("address", check_fields=False)
-    def validate_address(cls, v):
-        if v is not None and len(v) > 500:
-            raise ValueError("Address must be at most 500 characters")
-        return v
+    class Config:
+        from_attributes = True
 
 
 class CustomerResponse(CustomerBase):
