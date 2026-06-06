@@ -45,19 +45,19 @@ class ProductUpdate(BaseModel):
     price: Optional[float] = None
     stock_quantity: Optional[int] = None
 
-    @validator("name")
+    @validator("name", check_fields=False)
     def validate_name(cls, v):
         if v is not None and (len(v) < 1 or len(v) > 255):
             raise ValueError("Name must be between 1 and 255 characters")
         return v
 
-    @validator("price")
+    @validator("price", check_fields=False)
     def validate_price(cls, v):
         if v is not None and v <= 0:
             raise ValueError("Price must be greater than 0")
         return v
 
-    @validator("stock_quantity")
+    @validator("stock_quantity", check_fields=False)
     def validate_stock(cls, v):
         if v is not None and v < 0:
             raise ValueError("Stock quantity cannot be negative")
@@ -108,19 +108,19 @@ class CustomerUpdate(BaseModel):
     phone_number: Optional[str] = None
     address: Optional[str] = None
 
-    @validator("full_name")
+    @validator("full_name", check_fields=False)
     def validate_full_name(cls, v):
         if v is not None and (len(v) < 1 or len(v) > 255):
             raise ValueError("Full name must be between 1 and 255 characters")
         return v
 
-    @validator("phone_number")
+    @validator("phone_number", check_fields=False)
     def validate_phone(cls, v):
         if v is not None and len(v) > 20:
             raise ValueError("Phone number must be at most 20 characters")
         return v
 
-    @validator("address")
+    @validator("address", check_fields=False)
     def validate_address(cls, v):
         if v is not None and len(v) > 500:
             raise ValueError("Address must be at most 500 characters")
