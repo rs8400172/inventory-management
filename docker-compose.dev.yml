@@ -1,0 +1,33 @@
+#!/bin/bash
+# Development docker-compose override
+# Run with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.9'
+
+services:
+  inventory-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://user:password@inventory-postgres:5432/inventory_db
+      ENVIRONMENT: development
+      DEBUG: "true"
+    volumes:
+      - ./backend:/app
+    command: python main.py
+    ports:
+      - "8001:8000"
+
+  inventory-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    environment:
+      VITE_API_URL: http://localhost:8001
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    ports:
+      - "3001:3000"
+    command: npm run dev -- --host 0.0.0.0

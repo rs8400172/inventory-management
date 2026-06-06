@@ -1,0 +1,66 @@
+services:
+  # PostgreSQL Database
+  inventory-postgres:
+    image: postgres:16-alpine
+    container_name: inventory-postgres-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-inventory_db}
+    volumes:
+      - inventory_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - inventory-app-network
+    restart: unless-stopped
+
+  # Backend API
+  inventory-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inventory-api-server
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-user}:${DB_PASSWORD:-password}@inventory-postgres:5432/${DB_NAME:-inventory_db}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-true}
+    ports:
+      - "${BACKEND_PORT:-8001}:8000"
+    depends_on:
+      inventory-postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - inventory-app-network
+    restart: unless-stopped
+
+  # Frontend Application
+  inventory-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: inventory-web-app
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8001}
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+    depends_on:
+      - inventory-api
+    networks:
+      - inventory-app-network
+    restart: unless-stopped
+
+volumes:
+  inventory_postgres_data:
+    driver: local
+
+networks:
+  inventory-app-network:
+    driver: bridge
